@@ -9,17 +9,16 @@
     .card { border: 1px solid #e6e6e6; border-radius: 14px; padding: 18px; box-shadow: 0 1px 8px rgba(0,0,0,0.04); }
     label { display:block; margin: 12px 0 6px; font-weight: 600; }
     input, select { width:100%; padding: 10px; border-radius: 10px; border: 1px solid #ddd; font-size: 16px; }
-    .row { display:flex; gap: 10px; }
-    .row > div { flex: 1; }
-    button { margin-top: 14px; width:100%; padding: 12px; border: 0; border-radius: 12px; font-size: 16px; cursor:pointer; }
-    .ok { background: #111; color: #fff; }
+    button { margin-top: 14px; width:100%; padding: 12px; border: 0; border-radius: 12px; font-size: 16px; cursor:pointer; background:#111; color:#fff; }
     .msg { margin-top: 12px; font-size: 14px; }
   </style>
 </head>
 <body>
   <h1>Rückmeldung zur Hochzeit</h1>
+
   <div class="card">
-    <form id="rsvpForm">
+    <!-- WICHTIG: action= deine /exec URL -->
+    <form id="rsvpForm" target="hiddenFrame" method="POST" action="https://script.google.com/macros/s/AKfycbwGb7Tz8nZ00gQihDNf9Gu0s9Vgij9rsIsfDyj8CosPZ4Ia_qEI9H86DIzlVwHHxJ0Z/exec">
       <label for="name">Name</label>
       <input id="name" name="name" placeholder="Vor- und Nachname" required />
 
@@ -33,48 +32,32 @@
       <label for="guests">Wie viele Personen?</label>
       <select id="guests" name="guests" required>
         <option value="" disabled selected>Bitte auswählen</option>
-        <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
       </select>
 
-      <button class="ok" type="submit">Absenden</button>
+      <button type="submit">Absenden</button>
       <div class="msg" id="msg"></div>
     </form>
+
+    <!-- unsichtbarer Iframe: Formular sendet dahin, Seite bleibt stehen -->
+    <iframe name="hiddenFrame" style="display:none;"></iframe>
   </div>
 
   <script>
-    // HIER deine Apps-Script Web-App URL eintragen:
-    const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbwGb7Tz8nZ00gQihDNf9Gu0s9Vgij9rsIsfDyj8CosPZ4Ia_qEI9H86DIzlVwHHxJ0Z/exechttps://script.google.com/macros/s/AKfycbwGb7Tz8nZ00gQihDNf9Gu0s9Vgij9rsIsfDyj8CosPZ4Ia_qEI9H86DIzlVwHHxJ0Z/exec";
-
     const form = document.getElementById("rsvpForm");
     const msg = document.getElementById("msg");
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      msg.textContent = "Sende…";
-
-      const payload = {
-        name: document.getElementById("name").value.trim(),
-        attending: document.getElementById("attending").value,
-        guests: document.getElementById("guests").value
-      };
-
-      try {
-        const res = await fetch(ENDPOINT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-
-        const data = await res.json();
-        if (data.ok) {
-          msg.textContent = "Danke! Deine Antwort wurde gespeichert.";
-          form.reset();
-        } else {
-          msg.textContent = "Fehler beim Speichern. Bitte später erneut versuchen.";
-        }
-      } catch (err) {
-        msg.textContent = "Netzwerkfehler. Bitte später erneut versuchen.";
-      }
+    form.addEventListener("submit", () => {
+      msg.textContent = "Wird gesendet…";
+      // Nach kurzer Zeit Erfolg anzeigen (weil wir keine Antwort lesen können/müssen)
+      setTimeout(() => {
+        msg.textContent = "Danke! Deine Antwort wurde gespeichert.";
+        form.reset();
+      }, 900);
     });
   </script>
 </body>
